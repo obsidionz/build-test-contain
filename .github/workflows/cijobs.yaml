@@ -26,7 +26,7 @@ jobs:
     name: Tests & Linting
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: write  # needed for gh-pages branch to write coverage reports
       checks: write      # Add this for publishing test results
       pull-requests: write  # Add this for PR comments
     steps:
@@ -97,7 +97,7 @@ jobs:
         with:
           name: test-results
           path: target/surefire-reports/*.xml
-          
+
   build:
     name: Build Push Image
     needs: test
