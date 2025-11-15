@@ -48,6 +48,11 @@
         <a target='_blank' href='https://github.com/obsidionz/build-test-contain/deployments/github-pages'
           class="btn btn-success btn-lg">Github Test Analytics website</a>
       </p>
+      <p>
+        <img src='/img/get-started.svg' width='58px' /> &nbsp;
+        <a target='_blank' href='https://docs.microsoft.com/en-us/azure/java/?view=azure-java-latest'
+          class="btn btn-success btn-lg">Get started with Azure &amp; Java</a>
+      </p>
       <br />
       <h4>MIT Licence <i class="fa fa-heart"></i> Open Source</h4>
     </div>
