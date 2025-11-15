@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ToolsController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">demopipe</a> &gt; <a href="index.source.html" class="el_package">demo.app.controllers</a> &gt; <span class="el_source">ToolsController.java</span></div><h1>ToolsController.java</h1><pre class="source lang-java linenums">package demo.app.controllers;
+
+import java.io.FileNotFoundException;
+import java.net.MalformedURLException;
+import java.sql.SQLException;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+
+@Controller
+<span class="fc" id="L11">public final class ToolsController {</span>
+  /**
+   * CheckStyle forced me to add all these comments.
+   * @return Who cares
+   */
+  static final int MAX_ERR = 6;
+
+  /**
+   * Tools page.
+   * @return The named view
+   */
+  @GetMapping(&quot;/tools&quot;)
+  public String getTools() {
+<span class="nc" id="L24">    return &quot;tools&quot;;</span>
+  }
+
+  /**
+   * Force a fake error page.
+   * @return The named view
+   */
+  @GetMapping(&quot;/tools/error&quot;)
+  public String fakeError() throws Exception {
+<span class="nc" id="L33">    int randNum = (int) Math.floor(Math.random() * MAX_ERR);</span>
+
+<span class="nc bnc" id="L35" title="All 6 branches missed.">    switch (randNum) {</span>
+      case 0:
+<span class="nc" id="L37">        throw new NullPointerException(</span>
+                &quot;Oh that thing you liked? It's gone&quot;
+              );
+      case 1:
+<span class="nc" id="L41">        throw new MalformedURLException(</span>
+                &quot;URL has too many gerbils&quot;
+              );
+      case 2:
+<span class="nc" id="L45">        throw new ArrayIndexOutOfBoundsException(</span>
+                &quot;Wow I thought that array was bigger&quot;
+              );
+      case 3:
+<span class="nc" id="L49">        throw new SQLException(</span>
+                &quot;Permission denied for table LEMON_CURD&quot;
+              );
+      case 4:
+<span class="nc" id="L53">        throw new StackOverflowError(</span>
+                &quot;Stack overflow! I mean it, a real one, not the website&quot;
+              );
+      default:
+<span class="nc" id="L57">        throw new FileNotFoundException(</span>
+                &quot;File unexpectedly turned into cheese&quot;
+              );
+    }
+  }
+
+  /**
+   * Force a CPU load spike.
+   * @param model something
+   * @return The named view
+   */
+  @GetMapping(&quot;/tools/cpu&quot;)
+  public String cpuLoad(final Model model) {
+<span class="nc" id="L70">    long start = java.lang.System.currentTimeMillis();</span>
+<span class="nc bnc" id="L71" title="All 2 branches missed.">    for (int i = 0; i &lt; 499900000.0; i++) {</span>
+<span class="nc" id="L72">      Math.pow(9000.0, 9000.0);</span>
+    }
+<span class="nc" id="L74">    long elapsed = java.lang.System.currentTimeMillis() - start;</span>
+
+<span class="nc" id="L76">    model.addAttribute(&quot;time&quot;, elapsed);</span>
+<span class="nc" id="L77">    return &quot;tools&quot;;</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

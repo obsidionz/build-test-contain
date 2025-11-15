@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MBeanController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">demopipe</a> &gt; <a href="index.source.html" class="el_package">demo.app.controllers</a> &gt; <span class="el_source">MBeanController.java</span></div><h1>MBeanController.java</h1><pre class="source lang-java linenums">package demo.app.controllers;
+
+import java.lang.management.ManagementFactory;
+import java.util.HashMap;
+import java.util.Set;
+import javax.management.MBeanAttributeInfo;
+import javax.management.MBeanInfo;
+import javax.management.MBeanServer;
+import javax.management.ObjectName;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+
+@Controller
+<span class="fc" id="L15">public class MBeanController {</span>
+
+  /**
+   * Display system info.
+   * 
+   * @return The named view
+   */
+  @GetMapping(&quot;/mbeans&quot;)
+   public String getMetrics(Model model) throws Exception {
+<span class="nc" id="L24">    HashMap&lt;String, Object&gt; resp = new HashMap&lt;String, Object&gt;();</span>
+
+<span class="nc" id="L26">    MBeanServer platmBeanServer = ManagementFactory.getPlatformMBeanServer();</span>
+<span class="nc" id="L27">    Set&lt;ObjectName&gt; mbeanNames = platmBeanServer.queryNames(null, null);</span>
+
+<span class="nc bnc" id="L29" title="All 2 branches missed.">    for (ObjectName name : mbeanNames) {</span>
+<span class="nc" id="L30">      MBeanInfo info = platmBeanServer.getMBeanInfo(name);</span>
+<span class="nc" id="L31">      HashMap&lt;String, Object&gt; mbeanSection = new HashMap&lt;String, Object&gt;();</span>
+<span class="nc bnc" id="L32" title="All 2 branches missed.">      for (MBeanAttributeInfo attr : info.getAttributes()) {</span>
+        try {
+<span class="nc bnc" id="L34" title="All 2 branches missed.">          if (attr.getName().equalsIgnoreCase(&quot;LastGcInfo&quot;)) {</span>
+<span class="nc" id="L35">            continue;</span>
+          }
+<span class="nc bnc" id="L37" title="All 2 branches missed.">          if (attr.getName().equalsIgnoreCase(&quot;ClassPath&quot;)) {</span>
+<span class="nc" id="L38">            continue;</span>
+          }
+<span class="nc bnc" id="L40" title="All 2 branches missed.">          if (attr.getName().equalsIgnoreCase(&quot;SystemProperties&quot;)) {</span>
+<span class="nc" id="L41">            continue;</span>
+          }
+<span class="nc" id="L43">          Object attrValue = platmBeanServer.getAttribute(ObjectName.getInstance(name.getCanonicalName()),</span>
+<span class="nc" id="L44">              attr.getName());</span>
+<span class="nc" id="L45">          mbeanSection.put(attr.getName(), attrValue.toString());</span>
+<span class="nc" id="L46">        } catch (Exception e) {</span>
+<span class="nc" id="L47">          continue;</span>
+<span class="nc" id="L48">        }</span>
+      }
+      // model.addAttribute(name.getCanonicalName(), mbeanSection);
+<span class="nc" id="L51">      resp.put(name.getCanonicalName(), mbeanSection);</span>
+<span class="nc" id="L52">    }</span>
+
+<span class="nc" id="L54">    model.addAttribute(&quot;data&quot;, resp);</span>
+<span class="nc" id="L55">    return &quot;mbeans&quot;;</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>
