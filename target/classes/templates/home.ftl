@@ -27,12 +27,12 @@
 
       <p>
         <img src='/img/octocat.png' width='58px' /> &nbsp;
-        <a target='_blank' href='https://github.com/benc-uk/java-demoapp' class="btn btn-info btn-lg">Project on
+        <a target='_blank' href='https://github.com/obsidionz/build-test-contain' class="btn btn-info btn-lg">Project on
           Github</a>
         &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
         <img src='/img/docker.png' width='58px' /> &nbsp;
-        <a target='_blank' href='https://hub.docker.com/r/bencuk/java-demoapp' class="btn btn-info btn-lg">Docker images
-          on Dockerhub</a>
+        <a target='_blank' href='https://github.com/obsidionz/build-test-contain/pkgs/container/build-test-contain' class="btn btn-info btn-lg">Docker images
+          on Github GHCR.io</a>
       </p>
 
       <hr />
