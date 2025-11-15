@@ -86,7 +86,6 @@
 	</dependencyManagement>
 
 	<build>
-		<pluginManagement>
 		<plugins>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
@@ -102,6 +101,9 @@
         			</execution>
     			</executions>
 			</plugin>
+		</plugins>
+		<pluginManagement>
+		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
