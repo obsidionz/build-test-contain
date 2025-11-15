@@ -43,22 +43,61 @@ jobs:
       - name: Run linting
         run: mvn checkstyle:check
       
-      - name: Run tests
-        run: mvn test
+      - name: Run tests with JaCoCo
+        run: mvn clean test jacoco:report
       
-      - name: Upload test results
+      - name: Generate JaCoCo Badge
+        id: jacoco
+        uses: cicirello/jacoco-badge-generator@v2
+        with:
+          badges-directory: badges
+          generate-branches-badge: true
+          generate-summary: true
+      
+      - name: Log coverage percentage
+        run: |
+          echo "coverage = ${{ steps.jacoco.outputs.coverage }}"
+          echo "branch coverage = ${{ steps.jacoco.outputs.branches }}"
+      
+      - name: Upload JaCoCo coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: jacoco-report
+          path: target/site/jacoco/
+      
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          file: ./target/site/jacoco/jacoco.xml
+          flags: unittests
+          name: codecov-umbrella
+          fail_ci_if_error: true
+          token: ${{ secrets.CODECOV_TOKEN }}
+      
+      - name: Publish coverage report to GitHub Pages
+        uses: JamesIves/github-pages-deploy-action@v4
+        if: github.ref == 'refs/heads/main'
+        with:
+          branch: gh-pages
+          folder: target/site/jacoco
+          target-folder: coverage
+      
+      - name: Add coverage comment to PR
+        uses: madrapps/jacoco-report@v1.6.1
+        if: github.event_name == 'pull_request'
+        with:
+          paths: ${{ github.workspace }}/target/site/jacoco/jacoco.xml
+          token: ${{ secrets.GITHUB_TOKEN }}
+          min-coverage-overall: 50
+          min-coverage-changed-files: 60
+      
+      - name: Upload test results # put them in the repo for download
         uses: actions/upload-artifact@v4
         if: ${{ always() && !env.ACT }}
         with:
           name: test-results
           path: target/surefire-reports/*.xml
-      
-      - name: Publish test results
-        uses: EnricoMi/publish-unit-test-result-action@v2
-        if: ${{ always() && !env.ACT }}
-        with:
-          files: target/surefire-reports/*.xml
-
+          
   build:
     name: Build Push Image
     needs: test
