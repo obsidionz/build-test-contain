@@ -1,11 +1,21 @@
 name: cijobs
 on:
   push:
-    branches: [main]
+    branches: [master]
     paths:
       - "src/**"
       - ".github/workflows/**"
+      - "Dockerfile"           # Docker build file changes
+      - "pom.xml"              # pom project changes
+      - ".mvn/**"              # Maven wrapper changes
+      - "mvnw"                 # 
+      - "mvnw.cmd"             # 
   pull_request:
+    paths:
+      - "src/**"
+      - ".github/workflows/**"
+      - "Dockerfile"
+      - "pom.xml"
 
 env:
   IMAGE_REG: ghcr.io
