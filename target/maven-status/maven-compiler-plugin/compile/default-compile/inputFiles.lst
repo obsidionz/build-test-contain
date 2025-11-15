@@ -1,0 +1,8 @@
+/home/osboxes/java-demoapp/demopipe/src/main/java/demo/app/controllers/UserController.java
+/home/osboxes/java-demoapp/demopipe/src/main/java/demo/app/controllers/InfoController.java
+/home/osboxes/java-demoapp/demopipe/src/main/java/demo/app/controllers/CustomErrorController.java
+/home/osboxes/java-demoapp/demopipe/src/main/java/demo/app/security/WebSecurityConfig.java
+/home/osboxes/java-demoapp/demopipe/src/main/java/demo/app/controllers/HomeController.java
+/home/osboxes/java-demoapp/demopipe/src/main/java/demo/app/controllers/MBeanController.java
+/home/osboxes/java-demoapp/demopipe/src/main/java/demo/app/JavaDemoapp.java
+/home/osboxes/java-demoapp/demopipe/src/main/java/demo/app/controllers/ToolsController.java
