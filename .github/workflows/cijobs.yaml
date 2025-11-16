@@ -20,6 +20,7 @@ on:
 env:
   IMAGE_REG: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
+  APP_NAME: build-test-contain
 
 jobs:
   test:
@@ -159,7 +160,7 @@ jobs:
         with:
           payload: |
             {
-              "text": "✅ Build Successful: ${{ github.repository }}",
+              "text": "✅ Build Deploy Successful: ${{ github.repository }}",
               "blocks": [
                 {
                   "type": "header",
@@ -214,7 +215,7 @@ jobs:
         with:
           payload: |
             {
-              "text": "❌ Build Failed: ${{ github.repository }}",
+              "text": "❌ Build Deploy Failed: ${{ github.repository }}",
               "blocks": [
                 {
                   "type": "header",
@@ -260,3 +261,53 @@ jobs:
                 }
               ]
             }
+
+  vps:
+    name: Push Image to VPS
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      attestations: write
+      id-token: write
+    steps:
+      - name: Deploy to VPS
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.VPS_IP }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_KEY }}
+          port: ${{ secrets.VPS_PORT }}
+          passphrase: ${{ secrets.VPS_PHRASE }}
+          script: |
+            # Navigate to app directory
+            cd /opt/${{ env.APP_NAME }} || mkdir -p /opt/${{ env.APP_NAME }} && cd /opt/${{ env.APP_NAME }}
+            
+            # Create .env file from secrets
+            cat > .env << EOF
+            GHCR_USERNAME=${{ github.actor }}
+	          APP_NAME=${{ env.APP_NAME }}
+            EOF
+            
+            rm docker-compose-vps.yml
+            # Download docker-compose-vps.yml if it doesn't exist
+            if [ ! -f docker-compose-vps.yml ]; then
+              curl -o docker-compose-vps.yml https://raw.githubusercontent.com/obsidionz/build-test-contain/refs/heads/main/docker-compose-vps.yml
+            fi
+            
+			      GHCR_TOK=${{ secrets.GHCR_PAT }}
+			      export GHCR_TOK
+			      echo "$GHCR_TOK" | docker login ghcr.io -u "$GHCR_USERNAME" --password-stdin
+			      GHCR_TOK=
+            # Pull latest image
+            docker compose -f docker-compose-vps.yml --env-file .env pull
+            
+            # Stop and remove old containers
+            docker compose -f docker-compose-vps.yml --env-file .env down
+            
+            # Start new containers
+            docker compose -f docker-compose-vps.yml --env-file .env up -d
+            
+            # Clean up old images
+            docker image prune -f

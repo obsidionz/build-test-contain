@@ -12,7 +12,7 @@ COPY mvnw ./mvnw
 COPY pom.xml .
 COPY src ./src
 
-# Make wrapper executable and build
+# Make wrapper executable and build runtime stage
 RUN chmod +x ./mvnw && \
     ./mvnw -ntp clean package -Drevision=${APP_VERSION} -DskipTests -Dmaven.test.skip=true -Dcheckstyle.skip=true && \
     mv target/demopipe-*.jar target/demopipe.jar
