@@ -154,8 +154,9 @@ jobs:
         if: success()
         uses: slackapi/slack-github-action@v1.27.0
         continue-on-error: true
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
         with:
-          webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
           payload: |
             {
               "text": "✅ Build Successful: ${{ github.repository }}",
@@ -208,8 +209,9 @@ jobs:
         if: failure()
         uses: slackapi/slack-github-action@v1.27.0
         continue-on-error: true
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
         with:
-          webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
           payload: |
             {
               "text": "❌ Build Failed: ${{ github.repository }}",
