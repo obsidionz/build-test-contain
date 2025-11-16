@@ -170,7 +170,7 @@ jobs:
           fi
       
       - name: Send Slack Notification
-        if: secrets.SLACK_WEBHOOK_URL != ''
+        if: ${{ secrets.SLACK_WEBHOOK_URL }} != ''
         uses: slackapi/slack-github-action@v1.27.0
         with:
           webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
