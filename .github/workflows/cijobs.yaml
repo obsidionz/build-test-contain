@@ -341,18 +341,19 @@ jobs:
             cat > .env << EOF
             GF_SECURITY_ADMIN_PASSWORD=${{ secrets.GRAF_PWD }}
             GF_USERS_ALLOW_SIGN_UP=false
+            GHCR_USERNAME=${{ github.actor }}
             EOF
 
             rm docker-compose-monitor.yml
             # Download docker-compose-monitor.yml if it doesn't exist
             if [ ! -f docker-compose-monitor.yml ]; then
-              curl -o docker-compose-monitor.yml https://raw.githubusercontent.com/obsidionz/build-test-contain/refs/heads/main/docker-compose-monitor.yml
+              curl -o docker-compose-monitor.yml https://raw.githubusercontent.com/obsidionz/build-test-contain/${{ github.ref_name }}/docker-compose-monitor.yml
             fi
             cd /opt/${{ env.GIT_MONITOR }}/prometheus || mkdir -p /opt/${{ env.GIT_MONITOR }}/prometheus && cd /opt/${{ env.GIT_MONITOR }}/prometheus
             rm prometheus.yml
             # Download prometheus config for data sources
             if [ ! -f prometheus.yml ]; then
-              curl -o prometheus.yml https://raw.githubusercontent.com/obsidionz/build-test-contain/refs/heads/main/prometheus/prometheus.yml
+              curl -o prometheus.yml https://raw.githubusercontent.com/obsidionz/build-test-contain/${{ github.ref_name }}/prometheus/prometheus.yml
               cd ..
             fi
             # Download grafana dashboard to prometheus data for github stats
@@ -362,7 +363,7 @@ jobs:
             rm dashboard_L00196753.json
             # Download dashboard config for grafana
             if [ ! -f dashboard_L00196753.json ]; then 
-              curl -o dashboard_L00196753.json https://raw.githubusercontent.com/obsidionz/build-test-contain/refs/heads/main/grafana/dashboard_L00196753.json
+              curl -o dashboard_L00196753.json https://raw.githubusercontent.com/obsidionz/build-test-contain/${{ github.ref_name }}/grafana/dashboard_L00196753.json
               cd ../../..
             fi
             GHCR_TOK=${{ secrets.GHCR_PAT }}
