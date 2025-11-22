@@ -1,7 +1,9 @@
 name: cijobs
 on:
   push:
-    branches: [main]
+    branches: 
+      - 'main'
+      - 'monitoring'
     paths:
       - "src/**"
       - ".github/workflows/**"
