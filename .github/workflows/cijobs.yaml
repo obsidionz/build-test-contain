@@ -342,6 +342,7 @@ jobs:
             GF_SECURITY_ADMIN_PASSWORD=${{ secrets.GRAF_PWD }}
             GF_USERS_ALLOW_SIGN_UP=false
             GHCR_USERNAME=${{ github.actor }}
+            GITHUB_EXPORTER_TOKEN=${{ secrets.GHCR_PAT }}
             EOF
 
             rm docker-compose-monitor.yml

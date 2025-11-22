@@ -49,7 +49,7 @@ services:
     image: promhippie/github-exporter:latest
     restart: always
     environment:
-      - GITHUB_EXPORTER_TOKEN=${{ secrets.GHCR_PAT }}
+      - GITHUB_EXPORTER_TOKEN=${GITHUB_EXPORTER_TOKEN}
       - GITHUB_EXPORTER_LOG_PRETTY=true
       - GITHUB_EXPORTER_REPO=obsidionz/build-test-contain,obsidionz/L00196753_IaC
     networks:
