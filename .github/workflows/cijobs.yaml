@@ -21,6 +21,7 @@ env:
   IMAGE_REG: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
   APP_NAME: build-test-contain
+  GIT_MONITOR: github-exporter
 
 jobs:
   test:
@@ -308,6 +309,72 @@ jobs:
 
             # Start new containers
             docker compose -f docker-compose-vps.yml --env-file .env up -d
+
+            # Clean up old images
+            docker image prune -f
+
+  monitoring:
+    name: monitor github stats
+    needs: vps
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      attestations: write
+      id-token: write
+    steps:
+      - name: run install container github exporter on VPS
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.VPS_IP }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_KEY }}
+          port: ${{ secrets.VPS_PORT }}
+          passphrase: ${{ secrets.VPS_PHRASE }}
+          script: |
+            # Navigate to app directory
+            cd /opt/${{ env.GIT_MONITOR }} || mkdir -p /opt/${{ env.GIT_MONITOR }} && cd /opt/${{ env.GIT_MONITOR }}
+
+            # Create .env file from secrets
+            cat > .env << EOF
+            GF_SECURITY_ADMIN_PASSWORD=${{ secrets.GRAF_PWD }}
+            GF_USERS_ALLOW_SIGN_UP=false
+            EOF
+
+            rm docker-compose-monitor.yml
+            # Download docker-compose-monitor.yml if it doesn't exist
+            if [ ! -f docker-compose-monitor.yml ]; then
+              curl -o docker-compose-monitor.yml https://raw.githubusercontent.com/obsidionz/build-test-contain/refs/heads/main/docker-compose-monitor.yml
+            fi
+            cd /opt/${{ env.GIT_MONITOR }}/prometheus || mkdir -p /opt/${{ env.GIT_MONITOR }}/prometheus && cd /opt/${{ env.GIT_MONITOR }}/prometheus
+            rm prometheus.yml
+            # Download prometheus config for data sources
+            if [ ! -f prometheus.yml ]; then
+              curl -o prometheus.yml https://raw.githubusercontent.com/obsidionz/build-test-contain/refs/heads/main/prometheus/prometheus.yml
+              cd ..
+            fi
+            # Download grafana dashboard to prometheus data for github stats
+            cd /opt/${{ env.GIT_MONITOR }}/grafana || mkdir -p /opt/${{ env.GIT_MONITOR }}/grafana && cd /opt/${{ env.GIT_MONITOR }}/grafana
+            cd /opt/${{ env.GIT_MONITOR }}/grafana/provisioning || mkdir -p /opt/${{ env.GIT_MONITOR }}/grafana/provisioning && cd /opt/${{ env.GIT_MONITOR }}/grafana/provisioning
+            cd /opt/${{ env.GIT_MONITOR }}/grafana/provisioning/dashboards || mkdir -p /opt/${{ env.GIT_MONITOR }}/grafana/provisioning/dashboards && cd /opt/${{ env.GIT_MONITOR }}/grafana/provisioning/dashboards
+            rm dashboard_L00196753.json
+            # Download dashboard config for grafana
+            if [ ! -f dashboard_L00196753.json ]; then 
+              curl -o dashboard_L00196753.json https://raw.githubusercontent.com/obsidionz/build-test-contain/refs/heads/main/grafana/dashboard_L00196753.json
+              cd ../../..
+            fi
+            GHCR_TOK=${{ secrets.GHCR_PAT }}
+            export GHCR_TOK
+            echo "$GHCR_TOK" | docker login ghcr.io -u "$GHCR_USERNAME" --password-stdin
+            GHCR_TOK=
+            # Pull latest image
+            docker compose -f docker-compose-monitor.yml --env-file .env pull
+
+            # Stop and remove old containers
+            docker compose -f docker-compose-monitor.yml --env-file .env down
+
+            # Start new containers
+            docker compose -f docker-compose-monitor.yml --env-file .env up -d
 
             # Clean up old images
             docker image prune -f
