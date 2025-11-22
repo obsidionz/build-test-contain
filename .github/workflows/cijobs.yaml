@@ -361,9 +361,21 @@ jobs:
             cd /opt/${{ env.GIT_MONITOR }}/grafana/provisioning || mkdir -p /opt/${{ env.GIT_MONITOR }}/grafana/provisioning && cd /opt/${{ env.GIT_MONITOR }}/grafana/provisioning
             cd /opt/${{ env.GIT_MONITOR }}/grafana/provisioning/dashboards || mkdir -p /opt/${{ env.GIT_MONITOR }}/grafana/provisioning/dashboards && cd /opt/${{ env.GIT_MONITOR }}/grafana/provisioning/dashboards
             rm dashboard_L00196753.json
+            rm dashboard.yml
             # Download dashboard config for grafana
-            if [ ! -f dashboard_L00196753.json ]; then 
-              curl -o dashboard_L00196753.json https://raw.githubusercontent.com/obsidionz/build-test-contain/${{ github.ref_name }}/grafana/dashboard_L00196753.json
+            if [ ! -f dashboard.yml ]; then 
+              curl -o dashboard.yml https://raw.githubusercontent.com/obsidionz/build-test-contain/${{ github.ref_name }}/grafana/dashboard.yml
+              curl -o dashboard_L00196753.json https://raw.githubusercontent.com/obsidionz/build-test-contain/${{ github.ref_name }}/grafana/dashboard_L00196753.json           
+              cd ../../..
+            fi
+            # Download grafana dashboard to prometheus data for github stats
+            cd /opt/${{ env.GIT_MONITOR }}/grafana || mkdir -p /opt/${{ env.GIT_MONITOR }}/grafana && cd /opt/${{ env.GIT_MONITOR }}/grafana
+            cd /opt/${{ env.GIT_MONITOR }}/grafana/provisioning || mkdir -p /opt/${{ env.GIT_MONITOR }}/grafana/provisioning && cd /opt/${{ env.GIT_MONITOR }}/grafana/provisioning
+            cd /opt/${{ env.GIT_MONITOR }}/grafana/provisioning/datasources || mkdir -p /opt/${{ env.GIT_MONITOR }}/grafana/provisioning/datasources && cd /opt/${{ env.GIT_MONITOR }}/grafana/provisioning/datasources
+            rm datasource.yml
+            # Download dashboard config for grafana
+            if [ ! -f datasource.yml ]; then 
+              curl -o datasource.yml https://raw.githubusercontent.com/obsidionz/build-test-contain/${{ github.ref_name }}/grafana/datasource.yml
               cd ../../..
             fi
             export GHCR_TOK="${{ secrets.GHCR_PAT }}"
