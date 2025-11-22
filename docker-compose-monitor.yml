@@ -1,0 +1,56 @@
+version: "3.1"
+
+volumes:
+    prometheus_data: {}
+    grafana_data: {}
+
+networks:
+  front-tier:
+  back-tier:
+
+services:
+  prometheus:
+    image: prom/prometheus:v2.53.0
+    volumes:
+      - ./prometheus/:/etc/prometheus/
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+    ports:
+      - 9090:9090
+    networks:
+      - back-tier
+
+  grafana:
+    image: grafana/grafana
+    depends_on:
+      - prometheus
+    ports:
+      - 3000:3000
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning/:/etc/grafana/provisioning/
+    env_file:
+      - .env
+    networks:
+      - back-tier
+      - front-tier
+
+  metrics:
+    tty: true
+    stdin_open: true
+    expose:
+      - 9504
+    ports:
+      - 9504:9504
+    image: promhippie/github-exporter:latest
+    restart: always
+    environment:
+      - GITHUB_EXPORTER_TOKEN=${{ secrets.GHCR_PAT }}
+      - GITHUB_EXPORTER_LOG_PRETTY=true
+      - GITHUB_EXPORTER_REPO=obsidionz/build-test-contain,obsidionz/L00196753_IaC
+    networks:
+      - back-tier
