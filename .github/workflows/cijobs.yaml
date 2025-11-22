@@ -299,8 +299,7 @@ jobs:
               curl -o docker-compose-vps.yml https://raw.githubusercontent.com/obsidionz/build-test-contain/refs/heads/main/docker-compose-vps.yml
             fi
 
-            GHCR_TOK=${{ secrets.GHCR_PAT }}
-            export GHCR_TOK
+            export GHCR_TOK="${{ secrets.GHCR_PAT }}"
             echo "$GHCR_TOK" | docker login ghcr.io -u "$GHCR_USERNAME" --password-stdin
             GHCR_TOK=
             # Pull latest image
@@ -367,8 +366,7 @@ jobs:
               curl -o dashboard_L00196753.json https://raw.githubusercontent.com/obsidionz/build-test-contain/${{ github.ref_name }}/grafana/dashboard_L00196753.json
               cd ../../..
             fi
-            GHCR_TOK=${{ secrets.GHCR_PAT }}
-            export GHCR_TOK
+            export GHCR_TOK="${{ secrets.GHCR_PAT }}"
             echo "$GHCR_TOK" | docker login ghcr.io -u "$GHCR_USERNAME" --password-stdin
             GHCR_TOK=
             # Pull latest image
