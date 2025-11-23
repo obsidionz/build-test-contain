@@ -111,7 +111,6 @@ jobs:
       packages: write
       attestations: write
       id-token: write
-      security-events: read
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -154,21 +153,6 @@ jobs:
           subject-name: ${{ env.IMAGE_REG }}/${{ env.IMAGE_NAME }}
           subject-digest: ${{ steps.push.outputs.digest }}
           push-to-registry: true
-
-      - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@master
-        with:
-          image-ref: '${{ env.IMAGE_REG }}/${{ env.IMAGE_NAME }}:main'
-          format: 'table'
-          exit-code: '0'
-          ignore-unfixed: true
-          vuln-type: 'os,library'
-          severity: 'CRITICAL,HIGH'
-
-      - name: Upload Trivy scan results to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@v3
-        with:
-          sarif_file: 'trivy-results.sarif'
         
       - name: Send Slack Success Notification
         if: success()
@@ -280,6 +264,45 @@ jobs:
                 }
               ]
             }
+
+  vulnerability_scans:
+    name: trivy to check conatiner image
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      attestations: write
+      id-token: write
+      security-events: read
+    steps:
+      - name: Run Trivy vulnerability scanner 2nd pass
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: '${{ env.IMAGE_REG }}/${{ env.IMAGE_NAME }}:main'
+          format: 'table'
+          exit-code: '0'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'
+          
+      - name: Run Trivy vulnerability scanner 1st pass
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: '${{ env.IMAGE_REG }}/${{ env.IMAGE_NAME }}:main'
+          hide-progress: false
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+          exit-code: '0'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'
+
+      - name: Upload Trivy scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v4
+        with:
+          sarif_file: 'trivy-results.sarif'
+
 
   vps:
     name: VPS push image
