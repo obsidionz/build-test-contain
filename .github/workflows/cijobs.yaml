@@ -72,7 +72,7 @@ jobs:
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v5
         with:
-          file: ./target/site/jacoco/jacoco.xml
+          files: ./target/site/jacoco/jacoco.xml
           flags: unittests
           name: codecov-umbrella
           fail_ci_if_error: true
@@ -111,6 +111,7 @@ jobs:
       packages: write
       attestations: write
       id-token: write
+      security-events: read
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
