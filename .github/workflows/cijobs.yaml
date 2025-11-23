@@ -299,6 +299,34 @@ jobs:
             # Clean up old images
             docker image prune -f
 
+      - name: Send Slack Success Notification
+        if: success()
+        uses: slackapi/slack-github-action@v2.0.0
+        id: slack_notify_trivy_ok
+        with:
+          webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
+          webhook-type: incoming-webhook
+          errors: true
+          payload: |
+            text: "✅ VPS new container image succeeded for *${{ github.repository }}* on branch *${{ github.ref_name }}* by *${{ github.actor }}*"
+          
+      - name: Send Slack failure Notification
+        if: failure()
+        uses: slackapi/slack-github-action@v2.0.0
+        id: slack_notify_trivy_fail
+        with:
+          webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
+          webhook-type: incoming-webhook
+          errors: true
+          payload: |
+            text: "VPS new conainter image failed for *${{ github.repository }}* on branch *${{ github.ref_name }}* by *${{ github.actor }}*"
+
+      - name: Print Slack response
+        run: |
+          echo "Slack OK: ${{ steps.slack_notify.outputs.ok }}"
+          echo "Slack response: ${{ steps.slack_notify.outputs.response }}"
+
+
   monitoring:
     name: monitor github stats
     needs: vps
@@ -377,3 +405,30 @@ jobs:
 
             # Clean up old images
             docker image prune -f
+
+      - name: Send Slack Success Notification
+        if: success()
+        uses: slackapi/slack-github-action@v2.0.0
+        id: slack_notify_trivy_ok
+        with:
+          webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
+          webhook-type: incoming-webhook
+          errors: true
+          payload: |
+            text: "✅ Monitoring container deploy succeeded for *${{ github.repository }}* on branch *${{ github.ref_name }}* by *${{ github.actor }}*"
+          
+      - name: Send Slack failure Notification
+        if: failure()
+        uses: slackapi/slack-github-action@v2.0.0
+        id: slack_notify_trivy_fail
+        with:
+          webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
+          webhook-type: incoming-webhook
+          errors: true
+          payload: |
+            text: "Monitoring container deply failed for *${{ github.repository }}* on branch *${{ github.ref_name }}* by *${{ github.actor }}*"
+
+      - name: Print Slack response
+        run: |
+          echo "Slack OK: ${{ steps.slack_notify.outputs.ok }}"
+          echo "Slack response: ${{ steps.slack_notify.outputs.response }}"
