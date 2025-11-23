@@ -1,7 +1,7 @@
 FROM eclipse-temurin:21-jdk-alpine AS build
 ARG APP_VERSION=5.0.0
 LABEL Name="Java SpringBoot Demopipe App" Version=${APP_VERSION}
-LABEL org.opencontainers.image.source = "https://github.com/obsidionz/build-test-contain"
+LABEL org.opencontainers.image.source="https://github.com/obsidionz/build-test-contain"
 WORKDIR /build 
 
 # Copy Maven wrapper
