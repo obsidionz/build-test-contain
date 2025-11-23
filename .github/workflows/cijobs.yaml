@@ -305,7 +305,7 @@ jobs:
       - name: Upload Trivy scan results to GitHub Security tab
         uses: github/codeql-action/upload-sarif@v4
         with:
-          sarif-file: 'trivy-results.sarif'  # upload to github result
+          sarif_file: 'trivy-results.sarif'  # upload to github result
 
   vps:
     name: VPS push image
