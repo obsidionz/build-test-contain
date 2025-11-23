@@ -157,7 +157,7 @@ jobs:
       - name: Send Slack Success Notification
         if: success()
         uses: slackapi/slack-github-action@v2.0.0
-        id: slack_notify
+        id: slack_notify_pass
         with:
           webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
           webhook-type: incoming-webhook
@@ -168,7 +168,7 @@ jobs:
       - name: Send Slack failure Notification
         if: failure()
         uses: slackapi/slack-github-action@v2.0.0
-        id: slack_notify
+        id: slack_notify_fail
         with:
           webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
           webhook-type: incoming-webhook
@@ -226,7 +226,7 @@ jobs:
       - name: Send Slack Success Notification
         if: success()
         uses: slackapi/slack-github-action@v2.0.0
-        id: slack_notify
+        id: slack_notify_trivy_ok
         with:
           webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
           webhook-type: incoming-webhook
@@ -237,7 +237,7 @@ jobs:
       - name: Send Slack failure Notification
         if: failure()
         uses: slackapi/slack-github-action@v2.0.0
-        id: slack_notify
+        id: slack_notify_trivy_fail
         with:
           webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
           webhook-type: incoming-webhook
