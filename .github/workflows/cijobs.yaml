@@ -161,13 +161,38 @@ jobs:
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
         with:
-          slack-message: |
-            ✅ *Build Successful*
-            *Repository:* ${{ github.repository }}
-            *Branch:* ${{ github.ref_name }}
-            *Author:* ${{ github.actor }}
-            *Image:* ghcr.io/${{ github.repository }}:main
-            <https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}|View Run>
+          payload: |
+            {
+              "text": "✅ *Build Successful*",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "✅ *Build Successful*"
+                  }
+                },
+                {
+                  "type": "section",
+                  "fields": [
+                    { "type": "mrkdwn", "text": "*Repository:*\n${{ github.repository }}" },
+                    { "type": "mrkdwn", "text": "*Branch:*\n${{ github.ref_name }}" },
+                    { "type": "mrkdwn", "text": "*Author:*\n${{ github.actor }}" },
+                    { "type": "mrkdwn", "text": "*Image:*\nghcr.io/${{ github.repository }}:main" }
+                  ]
+                },
+                {
+                  "type": "actions",
+                  "elements": [
+                    {
+                      "type": "button",
+                      "text": { "type": "plain_text", "text": "View Run" },
+                      "url": "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+                    }
+                  ]
+                }
+              ]
+            }
           
       - name: Send Slack Failure Notification
         if: failure()
