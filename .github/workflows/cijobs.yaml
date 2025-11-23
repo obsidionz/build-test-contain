@@ -157,42 +157,17 @@ jobs:
       - name: Send Slack Success Notification
         if: success()
         uses: slackapi/slack-github-action@v2.0.0
-        continue-on-error: true
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        id: slack_notify
         with:
+          webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
+          webhook-type: incoming-webhook
+          errors: true
           payload: |
-            {
-              "text": "✅ *Build Successful*",
-              "blocks": [
-                {
-                  "type": "section",
-                  "text": {
-                    "type": "mrkdwn",
-                    "text": "✅ *Build Successful*"
-                  }
-                },
-                {
-                  "type": "section",
-                  "fields": [
-                    { "type": "mrkdwn", "text": "*Repository:*\n${{ github.repository }}" },
-                    { "type": "mrkdwn", "text": "*Branch:*\n${{ github.ref_name }}" },
-                    { "type": "mrkdwn", "text": "*Author:*\n${{ github.actor }}" },
-                    { "type": "mrkdwn", "text": "*Image:*\nghcr.io/${{ github.repository }}:main" }
-                  ]
-                },
-                {
-                  "type": "actions",
-                  "elements": [
-                    {
-                      "type": "button",
-                      "text": { "type": "plain_text", "text": "View Run" },
-                      "url": "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-                    }
-                  ]
-                }
-              ]
-            }
+            text: "✅ Build succeeded for *${{ github.repository }}* on branch *${{ github.ref_name }}* by *${{ github.actor }}*"
+      - name: Print Slack response
+        run: |
+          echo "Slack OK: ${{ steps.slack_notify.outputs.ok }}"
+          echo "Slack response: ${{ steps.slack_notify.outputs.response }}"
           
       - name: Send Slack Failure Notification
         if: failure()
