@@ -164,66 +164,22 @@ jobs:
           errors: true
           payload: |
             text: "✅ Build succeeded for *${{ github.repository }}* on branch *${{ github.ref_name }}* by *${{ github.actor }}*"
+          
+      - name: Send Slack failure Notification
+        if: failure()
+        uses: slackapi/slack-github-action@v2.0.0
+        id: slack_notify
+        with:
+          webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
+          webhook-type: incoming-webhook
+          errors: true
+          payload: |
+            text: "Build failed for *${{ github.repository }}* on branch *${{ github.ref_name }}* by *${{ github.actor }}*"
+
       - name: Print Slack response
         run: |
           echo "Slack OK: ${{ steps.slack_notify.outputs.ok }}"
           echo "Slack response: ${{ steps.slack_notify.outputs.response }}"
-          
-      - name: Send Slack Failure Notification
-        if: failure()
-        uses: slackapi/slack-github-action@v1.27.0
-        continue-on-error: true
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-        with:
-          payload: |
-            {
-              "text": "❌ Build Deploy Failed: ${{ github.repository }}",
-              "blocks": [
-                {
-                  "type": "header",
-                  "text": {
-                    "type": "plain_text",
-                    "text": "❌ Build Failed"
-                  }
-                },
-                {
-                  "type": "section",
-                  "fields": [
-                    {
-                      "type": "mrkdwn",
-                      "text": "*Repository:*\n${{ github.repository }}"
-                    },
-                    {
-                      "type": "mrkdwn",
-                      "text": "*Branch:*\n${{ github.ref_name }}"
-                    },
-                    {
-                      "type": "mrkdwn",
-                      "text": "*Author:*\n${{ github.actor }}"
-                    },
-                    {
-                      "type": "mrkdwn",
-                      "text": "*Commit:*\n${{ github.sha }}"
-                    }
-                  ]
-                },
-                {
-                  "type": "actions",
-                  "elements": [
-                    {
-                      "type": "button",
-                      "text": {
-                        "type": "plain_text",
-                        "text": "View Run"
-                      },
-                      "url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}",
-                      "style": "danger"
-                    }
-                  ]
-                }
-              ]
-            }
 
   vulnerability_scans:
     name: trivy to check container image
@@ -266,6 +222,33 @@ jobs:
         uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: 'trivy-results.sarif'  # upload to github result
+
+      - name: Send Slack Success Notification
+        if: success()
+        uses: slackapi/slack-github-action@v2.0.0
+        id: slack_notify
+        with:
+          webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
+          webhook-type: incoming-webhook
+          errors: true
+          payload: |
+            text: "✅ Trivy succeeded for *${{ github.repository }}* on branch *${{ github.ref_name }}* by *${{ github.actor }}*"
+          
+      - name: Send Slack failure Notification
+        if: failure()
+        uses: slackapi/slack-github-action@v2.0.0
+        id: slack_notify
+        with:
+          webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
+          webhook-type: incoming-webhook
+          errors: true
+          payload: |
+            text: "Trivy failed for *${{ github.repository }}* on branch *${{ github.ref_name }}* by *${{ github.actor }}*"
+
+      - name: Print Slack response
+        run: |
+          echo "Slack OK: ${{ steps.slack_notify.outputs.ok }}"
+          echo "Slack response: ${{ steps.slack_notify.outputs.response }}"
 
   vps:
     name: VPS push image
