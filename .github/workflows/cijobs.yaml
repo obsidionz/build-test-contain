@@ -265,43 +265,47 @@ jobs:
               ]
             }
 
-  vulnerability_scans:
-    name: trivy to check conatiner image
-    needs: build
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
-      attestations: write
-      id-token: write
-      security-events: read
-    steps:
-      - name: Run Trivy vulnerability scanner 2nd pass
-        uses: aquasecurity/trivy-action@master
-        with:
-          image-ref: '${{ env.IMAGE_REG }}/${{ env.IMAGE_NAME }}:main'
-          format: 'table'
-          exit-code: '0'
-          ignore-unfixed: true
-          vuln-type: 'os,library'
-          severity: 'CRITICAL,HIGH'
-          
-      - name: Run Trivy vulnerability scanner 1st pass
-        uses: aquasecurity/trivy-action@master
-        with:
-          image-ref: '${{ env.IMAGE_REG }}/${{ env.IMAGE_NAME }}:main'
-          hide-progress: false
-          format: 'sarif'
-          output: 'trivy-results.sarif'
-          exit-code: '0'
-          ignore-unfixed: true
-          vuln-type: 'os,library'
-          severity: 'CRITICAL,HIGH'
+vulnerability_scans:
+  name: trivy to check container image
+  needs: build
+  runs-on: ubuntu-latest
+  permissions:
+    contents: read
+    packages: write
+    attestations: write
+    id-token: write
+    security-events: write # needs wrtite access to events
+  steps:
+    # checkout
+    - name: Checkout code
+      uses: actions/checkout@v4
+    # Trivy step 1st pass 
+    - name: Run Trivy vulnerability scanner 1st pass
+      uses: aquasecurity/trivy-action@master
+      with:
+        image-ref: '${{ env.IMAGE_REG }}/${{ env.IMAGE_NAME }}:main'
+        hide-progress: false
+        format: 'sarif'
+        output: 'trivy-results.sarif'
+        exit-code: '0'
+        ignore-unfixed: true
+        vuln-type: 'os,library'
+        severity: 'CRITICAL,HIGH'
 
-      - name: Upload Trivy scan results to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@v4
-        with:
-          sarif_file: 'trivy-results.sarif'
+    - name: Run Trivy vulnerability scanner 2nd pass
+      uses: aquasecurity/trivy-action@master
+      with:
+        image-ref: '${{ env.IMAGE_REG }}/${{ env.IMAGE_NAME }}:main'
+        format: 'table'
+        exit-code: '0'
+        ignore-unfixed: true
+        vuln-type: 'os,library'
+        severity: 'CRITICAL,HIGH'
+
+    - name: Upload Trivy scan results to GitHub Security tab
+      uses: github/codeql-action/upload-sarif@v4
+      with:
+        sarif-file: 'trivy-results.sarif'  # upload to github result
 
 
   vps:
