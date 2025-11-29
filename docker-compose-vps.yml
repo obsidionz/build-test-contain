@@ -1,4 +1,4 @@
-services:
+services: # run demopipe app using image in ghcr
   app:
     image: ghcr.io/$GHCR_USERNAME/$APP_NAME:main
     container_name: $APP_NAME

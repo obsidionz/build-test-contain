@@ -1,38 +1,39 @@
 name: cijobs
 on:
-  push:
-    branches: 
+  push:             # push triggers 
+    branches:       # branches
       - 'main'
       - 'monitoring' # test branch
+      - 'scans' # scan branch
     paths:
       - "src/**"
       - ".github/workflows/**"
       - "Dockerfile"           # Docker build file changes
       - "pom.xml"              # pom project changes
       - ".mvn/**"              # Maven wrapper changes
-      - "mvnw"                 # 
-      - "mvnw.cmd"             # 
-  pull_request:
+      - "mvnw"                 # unix
+      - "mvnw.cmd"             # windows
+  pull_request:                # pull also trigger
     paths:
       - "src/**"
       - ".github/workflows/**"
       - "Dockerfile"
       - "pom.xml"
 
-env:
+env:   # using ghcr repo & exporter repo for git stats monitor apps 
   IMAGE_REG: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
   APP_NAME: build-test-contain
   GIT_MONITOR: github-exporter
 
-jobs:
+jobs:  # jobs defined
   test:
     name: Tests & Linting
     runs-on: ubuntu-latest
     permissions:
       contents: write  # needed for gh-pages branch to write coverage reports
-      checks: write      # Add this for publishing test results
-      pull-requests: write  # Add this for PR comments
+      checks: write      # publishing test results
+      pull-requests: write  #  PR comments
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -44,13 +45,13 @@ jobs:
           distribution: 'temurin'
           cache: 'maven'
       
-      - name: Run linting
+      - name: Run linting # lint check
         run: mvn checkstyle:check
       
-      - name: Run tests with JaCoCo
+      - name: Run tests with JaCoCo # coverage of tests
         run: mvn clean test jacoco:report
       
-      - name: Generate JaCoCo Badge
+      - name: Generate JaCoCo Badge # record coverage publish in repo
         id: jacoco
         uses: cicirello/jacoco-badge-generator@v2
         with:
@@ -63,7 +64,7 @@ jobs:
           echo "coverage = ${{ steps.jacoco.outputs.coverage }}"
           echo "branch coverage = ${{ steps.jacoco.outputs.branches }}"
       
-      - name: Upload JaCoCo coverage report
+      - name: Upload JaCoCo coverage report # send to codecov report
         uses: actions/upload-artifact@v4
         with:
           name: jacoco-report
@@ -78,7 +79,7 @@ jobs:
           fail_ci_if_error: true
           token: ${{ secrets.CODECOV_TOKEN }}
       
-      - name: Publish coverage report to GitHub Pages
+      - name: Publish coverage report to GitHub Pages # send to github report
         uses: JamesIves/github-pages-deploy-action@v4
         if: github.ref == 'refs/heads/main'
         with:
@@ -86,7 +87,7 @@ jobs:
           folder: target/site/jacoco
           target-folder: coverage
       
-      - name: Add coverage comment to PR
+      - name: Add coverage comment to PR # jacoco artifact logged 
         uses: madrapps/jacoco-report@v1.6.1
         if: github.event_name == 'pull_request'
         with:
@@ -102,7 +103,7 @@ jobs:
           name: test-results
           path: target/surefire-reports/*.xml
 
-  build:
+  build: # build image clean for ghcr.io
     name: Build Push Image
     needs: test
     runs-on: ubuntu-latest
@@ -138,7 +139,7 @@ jobs:
         with:
           images: ${{ env.IMAGE_REG }}/${{ env.IMAGE_NAME }}
       
-      - name: Build and push Docker image
+      - name: Build and push Docker image # publish ghcr.io package
         id: push
         uses: docker/build-push-action@v6
         with:
@@ -147,14 +148,14 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
       
-      - name: Generate artifact attestation
+      - name: Generate artifact attestation # log artifact attestation
         uses: actions/attest-build-provenance@v2
         with:
           subject-name: ${{ env.IMAGE_REG }}/${{ env.IMAGE_NAME }}
           subject-digest: ${{ steps.push.outputs.digest }}
           push-to-registry: true
 
-      - name: Send Slack Success Notification
+      - name: Send Slack Success Notification # notify slack 
         if: success()
         uses: slackapi/slack-github-action@v2.0.0
         id: slack_notify_pass
@@ -165,7 +166,7 @@ jobs:
           payload: |
             text: "✅ Build succeeded for *${{ github.repository }}* on branch *${{ github.ref_name }}* by *${{ github.actor }}*"
           
-      - name: Send Slack failure Notification
+      - name: Send Slack failure Notification # notify slack 
         if: failure()
         uses: slackapi/slack-github-action@v2.0.0
         id: slack_notify_fail
@@ -181,7 +182,7 @@ jobs:
           echo "Slack OK: ${{ steps.slack_notify.outputs.ok }}"
           echo "Slack response: ${{ steps.slack_notify.outputs.response }}"
 
-  vulnerability_scans:
+  vulnerability_scans: # trivy SCA checks on code
     name: trivy to check container image
     needs: build
     runs-on: ubuntu-latest
@@ -190,7 +191,7 @@ jobs:
       packages: write
       attestations: write
       id-token: write
-      security-events: write # needs wrtite access to events
+      security-events: write # needs write access to events
     steps:
     # checkout
       - name: Checkout code
@@ -223,7 +224,7 @@ jobs:
         with:
           sarif_file: 'trivy-results.sarif'  # upload to github result
 
-      - name: Send Slack Success Notification
+      - name: Send Slack Success Notification # notify slack 
         if: success()
         uses: slackapi/slack-github-action@v2.0.0
         id: slack_notify_trivy_ok
@@ -234,7 +235,7 @@ jobs:
           payload: |
             text: "✅ Trivy succeeded for *${{ github.repository }}* on branch *${{ github.ref_name }}* by *${{ github.actor }}*"
           
-      - name: Send Slack failure Notification
+      - name: Send Slack failure Notification # notify slack 
         if: failure()
         uses: slackapi/slack-github-action@v2.0.0
         id: slack_notify_trivy_fail
@@ -245,12 +246,12 @@ jobs:
           payload: |
             text: "Trivy failed for *${{ github.repository }}* on branch *${{ github.ref_name }}* by *${{ github.actor }}*"
 
-      - name: Print Slack response
+      - name: Print Slack response # slack  debug
         run: |
           echo "Slack OK: ${{ steps.slack_notify.outputs.ok }}"
           echo "Slack response: ${{ steps.slack_notify.outputs.response }}"
 
-  vps:
+  vps:  # send production package from ghcr to VPS
     name: VPS push image
     needs: build
     runs-on: ubuntu-latest
@@ -287,6 +288,7 @@ jobs:
             export GHCR_TOK="${{ secrets.GHCR_PAT }}"
             echo "$GHCR_TOK" | docker login ghcr.io -u "$GHCR_USERNAME" --password-stdin
             GHCR_TOK=
+            # trying to not leave ENV variables in history on host
             # Pull latest image
             docker compose -f docker-compose-vps.yml --env-file .env pull
 
@@ -299,7 +301,7 @@ jobs:
             # Clean up old images
             docker image prune -f
 
-      - name: Send Slack Success Notification
+      - name: Send Slack Success Notification # notify slack 
         if: success()
         uses: slackapi/slack-github-action@v2.0.0
         id: slack_notify_trivy_ok
@@ -310,7 +312,7 @@ jobs:
           payload: |
             text: "✅ VPS new container image succeeded for *${{ github.repository }}* on branch *${{ github.ref_name }}* by *${{ github.actor }}*"
           
-      - name: Send Slack failure Notification
+      - name: Send Slack failure Notification # notify slack 
         if: failure()
         uses: slackapi/slack-github-action@v2.0.0
         id: slack_notify_trivy_fail
@@ -321,13 +323,13 @@ jobs:
           payload: |
             text: "VPS new conainter image failed for *${{ github.repository }}* on branch *${{ github.ref_name }}* by *${{ github.actor }}*"
 
-      - name: Print Slack response
+      - name: Print Slack response # slack debug
         run: |
           echo "Slack OK: ${{ steps.slack_notify.outputs.ok }}"
           echo "Slack response: ${{ steps.slack_notify.outputs.response }}"
 
 
-  monitoring:
+  monitoring: # get monitor container running configured for 2 repos build-test-contain and L00196753_IaC
     name: monitor github stats
     needs: vps
     runs-on: ubuntu-latest
@@ -337,7 +339,7 @@ jobs:
       attestations: write
       id-token: write
     steps:
-      - name: run install container github exporter on VPS
+      - name: run install containers github exporter on VPS
         uses: appleboy/ssh-action@v1.0.0
         with:
           host: ${{ secrets.VPS_IP }}
@@ -406,7 +408,7 @@ jobs:
             # Clean up old images
             docker image prune -f
 
-      - name: Send Slack Success Notification
+      - name: Send Slack Success Notification # notify slack
         if: success()
         uses: slackapi/slack-github-action@v2.0.0
         id: slack_notify_trivy_ok
@@ -417,7 +419,7 @@ jobs:
           payload: |
             text: "✅ Monitoring container deploy succeeded for *${{ github.repository }}* on branch *${{ github.ref_name }}* by *${{ github.actor }}*"
           
-      - name: Send Slack failure Notification
+      - name: Send Slack failure Notification # notify slack
         if: failure()
         uses: slackapi/slack-github-action@v2.0.0
         id: slack_notify_trivy_fail
@@ -428,7 +430,7 @@ jobs:
           payload: |
             text: "Monitoring container deply failed for *${{ github.repository }}* on branch *${{ github.ref_name }}* by *${{ github.actor }}*"
 
-      - name: Print Slack response
+      - name: Print Slack response # slack debug
         run: |
           echo "Slack OK: ${{ steps.slack_notify.outputs.ok }}"
           echo "Slack response: ${{ steps.slack_notify.outputs.response }}"

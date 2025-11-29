@@ -1,17 +1,17 @@
 version: "3.1"
 
-volumes:
+volumes: # persistance when running 
     prometheus_data: {}
     grafana_data: {}
 
-networks:
+networks: # docker bridge labels
   front-tier:
   back-tier:
 
-services:
+services: # define services containers
   prometheus:
     image: prom/prometheus:v2.53.0
-    volumes:
+    volumes: # map container folders for volumes
       - ./prometheus/:/etc/prometheus/
       - prometheus_data:/prometheus
     command:
@@ -21,7 +21,7 @@ services:
       - '--web.console.templates=/usr/share/prometheus/consoles'
     ports:
       - 9090:9090
-    networks:
+    networks: # backend
       - back-tier
 
   grafana:
@@ -30,16 +30,16 @@ services:
       - prometheus
     ports:
       - 3000:3000
-    volumes:
+    volumes: # map container folders for volumes
       - grafana_data:/var/lib/grafana
       - ./grafana/provisioning/:/etc/grafana/provisioning/
     env_file:
       - .env
-    networks:
+    networks: # front end
       - back-tier
       - front-tier
 
-  metrics:
+  metrics: # this gets github stats for monitor data 
     tty: true
     stdin_open: true
     expose:
@@ -48,9 +48,9 @@ services:
       - 9504:9504
     image: promhippie/github-exporter:latest
     restart: always
-    environment:
+    environment: # REPOS mapped below 
       - GITHUB_EXPORTER_TOKEN=${GITHUB_EXPORTER_TOKEN}
       - GITHUB_EXPORTER_LOG_PRETTY=true
       - GITHUB_EXPORTER_REPO=obsidionz/build-test-contain,obsidionz/L00196753_IaC
-    networks:
+    networks: # backend
       - back-tier
