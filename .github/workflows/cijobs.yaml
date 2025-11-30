@@ -106,16 +106,15 @@ jobs:  # jobs defined
       - name: Build & run tests again 
         run: mvn -B clean verify
 
-      - name: Run tests with SonarQube # tests with SonarQube this time make sure automatic analysis is off on cloud
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarqube-scan-action@v6
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: |
-          mvn -B sonar:sonar -Dsonar.projectKey=obsidionz_build-test-contain -Dsonar.organization=obsidionz -Dsonar.host.url=https://sonarcloud.io
-
-      - name: Sonar Quality Gate Check
-        uses: SonarSource/sonarqube-scan-action@v5
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }} 
+        with:
+          args: >
+            -Dsonar.projectKey=obsidionz_build-test-contain
+            -Dsonar.organization=obsidionz
+            -Dsonar.host.url=https://sonarcloud.io
 
   build: # build image clean for ghcr.io
     name: Build Push Image
