@@ -117,12 +117,12 @@ jobs:  # jobs defined
       - name: Run tests with SonarQube # tests with SonarQube this time
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          run: mvn -B sonar:sonar \
-              -Dsonar.projectKey=obsidionz_build-test-contain \
-              -Dsonar.organization=L00196753 \
-              -Dsonar.host.url=https://sonarcloud.io
+        run: mvn -B sonar:sonar \
+            -Dsonar.projectKey=obsidionz_build-test-contain \
+            -Dsonar.organization=L00196753 \
+            -Dsonar.host.url=https://sonarcloud.io
               
-      - name: Optional: Sonar Quality Gate Check
+      - name: Sonar Quality Gate Check
         uses: SonarSource/sonarqube-scan-action@v5
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }} 
