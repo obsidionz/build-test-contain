@@ -42,6 +42,8 @@ Test
 
         Upload test results # put them in the repo for download 
 
+        SonarCloud Scan # use scan action sonarcloud for SAST 
+
 Build 
 
 	Build Push Image           # build image clean for ghcr.io 
