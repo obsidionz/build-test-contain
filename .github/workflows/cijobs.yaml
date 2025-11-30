@@ -103,8 +103,8 @@ jobs:  # jobs defined
           name: test-results
           path: target/surefire-reports/*.xml
   
-      - name: Build & run tests again 
-        run: mvn -B clean verify
+      - name: Build & prep for testing 
+        run: mvn compile -DskipTests
 
       - name: SonarCloud Scan
         uses: SonarSource/sonarqube-scan-action@v6
