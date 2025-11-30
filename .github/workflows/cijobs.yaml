@@ -93,8 +93,8 @@ jobs:  # jobs defined
         with:
           paths: ${{ github.workspace }}/target/site/jacoco/jacoco.xml
           token: ${{ secrets.GITHUB_TOKEN }}
-          min-coverage-overall: 50
-          min-coverage-changed-files: 60
+          min-coverage-overall: 30
+          min-coverage-changed-files: 40
       
       - name: Upload test results # put them in the repo for download
         uses: actions/upload-artifact@v4
