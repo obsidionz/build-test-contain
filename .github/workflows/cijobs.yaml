@@ -103,14 +103,6 @@ jobs:  # jobs defined
           name: test-results
           path: target/surefire-reports/*.xml
   
-      - name: Build and analyze
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: mvn verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
-          -Dsonar.host.url=https://sonarcloud.io \
-          -Dsonar.organization=<your organization key> \
-          -Dsonar.projectKey=obsidionz_build-test-contain
-
       - name: Build & run tests again 
         run: mvn -B clean verify
 
