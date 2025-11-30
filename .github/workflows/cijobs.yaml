@@ -115,6 +115,7 @@ jobs:  # jobs defined
             -Dsonar.projectKey=obsidionz_build-test-contain
             -Dsonar.organization=obsidionz
             -Dsonar.host.url=https://sonarcloud.io
+            -Dsonar.java.binaries=target/classes
 
   build: # build image clean for ghcr.io
     name: Build Push Image
